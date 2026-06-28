@@ -63,11 +63,20 @@ class TestBuildYtdlpCommand:
         assert "--postprocessor-args" not in cmd
         assert "320k" not in " ".join(cmd)
 
-    def test_metadata_and_thumbnail_always_present(self):
+    def test_metadata_always_present(self):
         for fmt in ("mp3", "opus"):
             cmd = build_ytdlp_command("u", "/tmp", audio_format=fmt)
             assert "--add-metadata" in cmd
-            assert "--embed-thumbnail" in cmd
+
+    def test_embed_thumbnail_present_by_default(self):
+        # Default keeps cover art so existing behavior is unchanged.
+        cmd = build_ytdlp_command("u", "/tmp")
+        assert "--embed-thumbnail" in cmd
+
+    def test_embed_thumbnail_omitted_when_disabled(self):
+        # Skipping it avoids yt-dlp's slow sequential thumbnail probing.
+        cmd = build_ytdlp_command("u", "/tmp", embed_thumbnail=False)
+        assert "--embed-thumbnail" not in cmd
 
     def test_auth_adds_cookies_from_browser(self):
         cmd = build_ytdlp_command("u", "/tmp", use_auth=True, auth_browser="brave")

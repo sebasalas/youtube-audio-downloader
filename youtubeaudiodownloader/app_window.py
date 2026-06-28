@@ -39,6 +39,10 @@ class YouTubeAudioDownloader(Gtk.Window):
         # Audio output format: "mp3" (re-encoded 320k) or "opus" (native, no conversion)
         self.audio_format = self.config.get('audio_format', config.DEFAULT_AUDIO_FORMAT)
 
+        # Embed cover art into the audio file. Disabling it skips yt-dlp's slow
+        # sequential thumbnail probing (~70% of per-video time on some videos).
+        self.embed_thumbnail = self.config.get('embed_thumbnail', True)
+
         # Current download process
         self.current_process = None
         self.download_stopped = threading.Event()

@@ -97,6 +97,17 @@ class PreferencesDialog(Gtk.Dialog):
         # Connect after setting initial state to avoid a spurious save on open
         self.mp3_radio.connect("toggled", self._on_audio_format_toggled)
 
+        # Embed cover art toggle. Disabling it skips yt-dlp's sequential
+        # thumbnail probing, which dominates the per-video time on playlists.
+        self.thumbnail_checkbox = Gtk.CheckButton(label="Embed cover art (slower)")
+        self.thumbnail_checkbox.set_tooltip_text(
+            "Embeds the video thumbnail as cover art. Disable for noticeably "
+            "faster playlist downloads."
+        )
+        self.thumbnail_checkbox.set_active(parent.embed_thumbnail)
+        self.thumbnail_checkbox.connect("toggled", self._on_embed_thumbnail_toggled)
+        audio_box.pack_start(self.thumbnail_checkbox, False, False, 0)
+
         audio_frame.add(audio_box)
         content.pack_start(audio_frame, False, False, 0)
 
@@ -147,6 +158,15 @@ class PreferencesDialog(Gtk.Dialog):
             logger.info(f"Audio format changed to: {audio_format}")
         except Exception as e:
             logger.error(f"Failed to save audio format setting: {e}")
+
+    def _on_embed_thumbnail_toggled(self, checkbox: Gtk.CheckButton) -> None:
+        try:
+            self.parent_window.embed_thumbnail = checkbox.get_active()
+            self.parent_window.config["embed_thumbnail"] = checkbox.get_active()
+            config.save_config(self.parent_window.config)
+            logger.info(f"Embed cover art {'enabled' if checkbox.get_active() else 'disabled'}")
+        except Exception as e:
+            logger.error(f"Failed to save embed thumbnail setting: {e}")
 
     def _on_notif_toggled(self, checkbox: Gtk.CheckButton) -> None:
         try:

@@ -25,12 +25,17 @@ def build_ytdlp_command(
     use_auth: bool = False,
     auth_browser: str = "firefox",
     playlist_items: Optional[str] = None,
+    embed_thumbnail: bool = True,
 ) -> list[str]:
     """Build the yt-dlp command for an audio download.
 
     For ``mp3`` the source audio is re-encoded to MP3 at 320k. For ``opus`` the
     native YouTube stream (already Opus) is copied into an .opus container with
     no re-encoding, so no bitrate post-processing is applied.
+
+    When ``embed_thumbnail`` is False, ``--embed-thumbnail`` is omitted. This
+    skips yt-dlp's sequential thumbnail probing, which on videos lacking
+    high-res thumbnails dominates the per-video time (~70%).
     """
     output_template = str(
         Path(download_path) / "%(playlist_index|)s%(playlist_index& - |)s%(title)s.%(ext)s"
@@ -46,8 +51,10 @@ def build_ytdlp_command(
     if audio_format == "mp3":
         cmd.extend(["--postprocessor-args", "ffmpeg:-b:a 320k"])
 
+    if embed_thumbnail:
+        cmd.append("--embed-thumbnail")
+
     cmd.extend([
-        "--embed-thumbnail",
         "--add-metadata",
         "--yes-playlist",
         "--ignore-errors",
@@ -160,6 +167,7 @@ def download_thread(
             return
 
         audio_format = getattr(window, "audio_format", "mp3")
+        embed_thumbnail = getattr(window, "embed_thumbnail", True)
         cmd = build_ytdlp_command(
             url,
             download_path,
@@ -167,6 +175,7 @@ def download_thread(
             use_auth=use_auth,
             auth_browser=auth_browser,
             playlist_items=playlist_items,
+            embed_thumbnail=embed_thumbnail,
         )
 
         format_label = "Opus (native, no conversion)" if audio_format == "opus" else "MP3 320k"
