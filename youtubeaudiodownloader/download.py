@@ -184,8 +184,6 @@ def download_thread(
             GLib.idle_add(window.log_message, "")
             logger.info("Using %s cookies for authentication", browser_name)
 
-        cmd.append(url)
-
         GLib.idle_add(window.log_message, "Running: {}".format(' '.join(cmd)))
         GLib.idle_add(window.log_message, "")
         logger.debug(f"Executing command: {' '.join(cmd)}")

@@ -3,7 +3,9 @@
 import glob
 import os
 import threading
+from unittest.mock import MagicMock
 
+from youtubeaudiodownloader import download
 from youtubeaudiodownloader.download import (
     build_ytdlp_command,
     temp_artifact_globs,
@@ -107,6 +109,62 @@ class TestBuildYtdlpCommand:
         out_idx = cmd.index("-o")
         assert cmd[out_idx + 1].startswith("/tmp/music")
         assert cmd[out_idx + 1].endswith(".%(ext)s")
+
+
+class _FakeProcess:
+    """Stand-in for the yt-dlp Popen object: no output, exits cleanly."""
+
+    def __init__(self):
+        self.pid = 4242
+        self.returncode = 0
+        self.stdout = iter(())  # empty -> the stdout loop ends immediately
+
+    def wait(self, timeout=None):
+        return 0
+
+    def kill(self):
+        pass
+
+
+def _thread_window(audio_format="opus"):
+    """MagicMock window with the real synchronization primitives the thread needs."""
+    window = MagicMock()
+    window.download_cancel_requested = threading.Event()
+    window.download_stopped = threading.Event()
+    window.download_lock = threading.Lock()
+    window.active_download_targets = set()
+    window.current_download_original = None
+    window.audio_format = audio_format
+    return window
+
+
+class TestDownloadThreadCommand:
+    """Guards the command actually handed to subprocess.Popen by download_thread."""
+
+    def test_url_passed_exactly_once_to_popen(self, monkeypatch, tmp_path):
+        """Regression: the URL was appended twice, making yt-dlp redownload the
+        whole playlist from item 1 after it finished."""
+        captured = {}
+
+        def fake_popen(cmd, **kwargs):
+            captured["cmd"] = cmd
+            return _FakeProcess()
+
+        monkeypatch.setattr(download.subprocess, "Popen", fake_popen)
+
+        url = "https://www.youtube.com/playlist?list=PLtest"
+        download.download_thread(
+            _thread_window(),
+            url,
+            "Playlist",
+            str(tmp_path),
+            use_auth=False,
+            auth_browser="brave",
+            # Truthy items skip the separate playlist-info subprocess fetch.
+            playlist_items="1,2,3",
+        )
+
+        assert captured["cmd"].count(url) == 1
 
 
 class TestTempArtifactGlobs:
