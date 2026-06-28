@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=YouTube Audio Downloader
+Comment=Download YouTube videos in MP3 320kbps format
+Exec=__INSTALL_PATH__/youtube_audio_downloader.py
+Icon=__ICON_NAME__
+Terminal=false
+Categories=AudioVideo;Audio;
+Keywords=youtube;mp3;download;descarga;audio;

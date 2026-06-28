@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=64", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "youtube-audio-downloader"
+version = "1.0.0"
+description = "GTK 3.0 desktop app to download YouTube audio (MP3 or Opus) using yt-dlp"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.8"
+dependencies = [
+    "yt-dlp",
+    "PyGObject",
+]
+
+[project.scripts]
+youtube-audio-downloader = "youtubeaudiodownloader.main:main"
+
+[project.urls]
+Repository = "https://github.com/sebasalas/youtube-audio-downloader"
+
+[tool.setuptools.packages.find]
+include = ["youtubeaudiodownloader*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true
+
+[tool.black]
+line-length = 120
+target-version = ["py310"]
+
+[tool.flake8]
+max-line-length = 120
+exclude = [".git", "__pycache__", "build", "dist"]

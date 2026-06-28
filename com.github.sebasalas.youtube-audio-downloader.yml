@@ -1,0 +1,49 @@
+app-id: com.github.sebasalas.youtube-audio-downloader
+runtime: org.gnome.Platform
+runtime-version: '45'
+sdk: org.gnome.Sdk
+command: youtube-audio-downloader
+
+finish-args:
+  - --share=ipc
+  - --share=network
+  - --socket=fallback-x11
+  - --socket=wayland
+  - --filesystem=xdg-download
+  - --filesystem=xdg-music
+  - --talk-name=org.freedesktop.Notifications
+
+modules:
+  - name: yt-dlp
+    buildsystem: simple
+    build-commands:
+      - pip3 install --no-build-isolation --prefix=/app yt-dlp
+    sources:
+      - type: archive
+        url: https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.tar.gz
+        sha256: ""
+    # Note: update sha256 with actual hash before building
+
+  - name: ffmpeg
+    buildsystem: autotools
+    config-opts:
+      - --disable-doc
+      - --disable-static
+      - --enable-shared
+      - --enable-gpl
+      - --enable-libmp3lame
+    sources:
+      - type: archive
+        url: https://ffmpeg.org/releases/ffmpeg-7.0.tar.xz
+        sha256: ""
+    # Note: update sha256 with actual hash before building
+
+  - name: youtube-audio-downloader
+    buildsystem: simple
+    build-commands:
+      - pip3 install --no-build-isolation --prefix=/app .
+      - install -Dm644 data/youtube-audio-downloader.svg /app/share/icons/hicolor/scalable/apps/com.github.sebasalas.youtube-audio-downloader.svg
+      - install -Dm644 youtube-audio-downloader.desktop.template /app/share/applications/com.github.sebasalas.youtube-audio-downloader.desktop
+    sources:
+      - type: dir
+        path: .
