@@ -13,7 +13,9 @@ with a clean single-window interface.
 - **Videos and playlists:** Download a single video or an entire playlist.
 - **Playlist preview:** See every video in a playlist and choose which ones to download
   before starting.
-- **Metadata and thumbnails:** Embeds the video thumbnail and metadata into the output file.
+- **Metadata and cover art:** Embeds metadata into every file and, optionally, the video
+  thumbnail as cover art. Cover art is on by default but can be disabled in Preferences for
+  noticeably faster playlist downloads.
 - **Private and unlisted content:** Authenticate using cookies from your browser
   (Firefox, Chrome, or Brave) to access content that isn't public.
 - **Live progress:** Progress bar with real-time download speed and ETA, plus a scrolling log.
@@ -83,11 +85,17 @@ Or run it directly without installing:
 Open **Preferences** and pick between **MP3 320k** and **Opus native** under
 "Audio format". The choice is saved and applied to subsequent downloads.
 
+### Cover art and speed
+
+Cover art embedding is enabled by default. Turning off **Embed cover art** in Preferences
+skips yt-dlp's thumbnail probing, which is the slowest step per video on playlists — useful
+when you want speed over embedded artwork.
+
 ## Configuration
 
-Preferences (last folder, window size, authentication, audio format, notifications)
-are stored in `~/.config/youtube-audio-downloader/config.json`. Delete that file to
-reset to defaults.
+Preferences (last folder, window size, authentication, audio format, cover art,
+notifications) are stored in `~/.config/youtube-audio-downloader/config.json`. Delete
+that file to reset to defaults.
 
 Logs are written to `~/.config/youtube-audio-downloader/app.log` (rotating, DEBUG level).
 
